@@ -1,0 +1,1 @@
+MMS branding patch: removes MMS 2.0 text. Extract and copy the src folder into the root of your running MMS project, replacing files. Keep your recently updated login.html (not included). Restart Spring Boot and press Ctrl+F5. No backend changes.

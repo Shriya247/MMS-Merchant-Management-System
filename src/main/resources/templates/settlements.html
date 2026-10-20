@@ -1,0 +1,790 @@
+
+<!DOCTYPE html>
+
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MMS | Settlements</title>
+<!-- SHARED MMS THEME -->
+<link rel="stylesheet" th:href="@{/css/mms-theme.css}"/>
+<style>
+        /* =====================================
+           SETTLEMENT PAGE STYLES
+        ===================================== */
+
+        .account-controls {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .account-controls form {
+            margin: 0;
+        }
+
+        .settlement-summary {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .summary-tile {
+            padding: 22px;
+            border: 1px solid #eee8f5;
+            border-radius: 18px;
+            box-shadow: 0 7px 20px rgba(57, 30, 100, 0.04);
+        }
+
+        .summary-tile:nth-child(1) {
+            background: #eee8ff;
+        }
+
+        .summary-tile:nth-child(2) {
+            background: #e7f8ef;
+        }
+
+        .summary-tile:nth-child(3) {
+            background: #fff0df;
+        }
+
+        .summary-icon {
+            display: inline-grid;
+            place-items: center;
+            width: 40px;
+            height: 40px;
+            margin-bottom: 14px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            font-size: 20px;
+        }
+
+        .summary-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #706585;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .summary-number {
+            display: block;
+            color: #422173;
+            font-size: 29px;
+            font-weight: 800;
+            overflow-wrap: anywhere;
+        }
+
+        .summary-note {
+            display: block;
+            margin-top: 8px;
+            color: #82799b;
+            font-size: 11px;
+        }
+
+        .settlement-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 22px;
+        }
+
+        .settlement-toolbar h3 {
+            margin: 0 0 5px;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .settlement-toolbar p {
+            margin: 0;
+            color: #82799b;
+            font-size: 12px;
+        }
+
+        .settlement-id {
+            color: #82799b;
+            font-weight: 800;
+        }
+
+        .merchant-name {
+            color: #422173;
+            font-weight: 800;
+        }
+
+        .settlement-amount {
+            color: #4c267d;
+            font-weight: 800;
+        }
+
+        .payment-reference {
+            display: inline-block;
+            padding: 7px 11px;
+            background: #f0eaff;
+            color: #7048e4;
+            border-radius: 9px;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .info-panel {
+            display: flex;
+            align-items: flex-start;
+            gap: 13px;
+            padding: 17px 20px;
+            margin-bottom: 24px;
+            background: #f1ebff;
+            border: 1px solid #e7ddff;
+            border-radius: 15px;
+        }
+
+        .info-icon {
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            width: 34px;
+            height: 34px;
+            background: white;
+            border-radius: 10px;
+            color: #7048e4;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .info-panel strong {
+            display: block;
+            margin-bottom: 4px;
+            color: #4c267d;
+            font-size: 13px;
+        }
+
+        .info-panel p {
+            margin: 0;
+            color: #706585;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .modal-close {
+            float: right;
+            padding: 0 5px;
+            border: none;
+            background: transparent;
+            color: #82799b;
+            font-size: 25px;
+            line-height: 1;
+        }
+
+        .modal-description {
+            margin: -6px 0 22px;
+            color: #82799b;
+            font-size: 12px;
+        }
+
+        .form-field {
+            margin-bottom: 18px;
+        }
+
+        .form-field label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .form-field select {
+            width: 100%;
+        }
+
+        .form-hint {
+            margin: 8px 0 0;
+            color: #82799b;
+            font-size: 11px;
+        }
+
+        .settlement-preview {
+            padding: 17px;
+            margin-top: 18px;
+            background: linear-gradient(
+                125deg,
+                #f1ebff,
+                #fff0f4
+            );
+            border-radius: 14px;
+        }
+
+        .preview-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #76648c;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .preview-amount {
+            display: block;
+            color: #4c267d;
+            font-size: 25px;
+            font-weight: 800;
+        }
+
+        .preview-merchant {
+            display: block;
+            margin-top: 6px;
+            color: #82799b;
+            font-size: 12px;
+        }
+
+        .settlement-note {
+            margin-top: 17px;
+            padding: 13px 15px;
+            border-radius: 11px;
+            background: #e7f8ef;
+            color: #247453;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .empty-icon {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 30px;
+        }
+
+        .record-count {
+            margin-bottom: 13px;
+            color: #82799b;
+            font-size: 12px;
+        }
+
+        .record-count strong {
+            color: #422173;
+        }
+
+        @media (max-width: 1050px) {
+            .settlement-summary {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 650px) {
+            .settlement-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .settlement-toolbar {
+                align-items: stretch;
+            }
+
+            .settlement-toolbar > button {
+                width: 100%;
+            }
+        }
+    </style>
+<link rel="stylesheet" th:href="@{/css/premium-pages.css}"/>
+<link rel="stylesheet" th:href="@{/css/premium-unified.css(v=3)}"/></head>
+<body>
+<!-- =====================================
+         SIDEBAR
+    ====================================== -->
+<aside class="sidebar">
+<div class="mms-brand">
+<div class="mms-logo">m</div>
+<div>
+<div class="mms-name">MMS</div>
+<div class="mms-caption">MERCHANT MANAGEMENT SYSTEM</div>
+</div>
+</div>
+<div class="nav-label">WORKSPACE</div>
+<a class="nav" href="/" th:href="@{/}">
+<span class="symbol"><svg aria-hidden="true" class="ui-icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"></path></svg></span> Dashboard
+    </a>
+<a class="nav" href="/merchants" th:href="@{/merchants}">
+<span class="symbol"><svg aria-hidden="true" class="ui-icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span> Merchants
+    </a>
+<a class="nav" href="/payments" th:href="@{/payments}">
+<span class="symbol"><svg aria-hidden="true" class="ui-icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><rect height="14" rx="3" width="20" x="2" y="5"></rect><path d="M2 10h20"></path></svg></span> Payments
+    </a>
+<a aria-current="page" class="nav active" href="/settlements" th:href="@{/settlements}">
+<span class="symbol"><svg aria-hidden="true" class="ui-icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><rect height="6" rx="1.5" width="18" x="3" y="3"></rect><rect height="9" rx="1.5" width="18" x="3" y="12"></rect><path d="M7 16h5"></path></svg></span> Settlements
+    </a>
+<a class="nav" href="/reports" th:href="@{/reports}">
+<span class="symbol"><svg aria-hidden="true" class="ui-icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><path d="M3 3v18h18"></path><path d="m7 16 4-5 4 3 5-7"></path></svg></span> Reports
+    </a>
+<div aria-hidden="true" class="sidebar-bottom">
+<svg preserveaspectratio="xMidYMax slice" viewbox="0 0 250 155" xmlns="http://www.w3.org/2000/svg">
+<defs><lineargradient id="sideWave" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#ffa76c"></stop><stop offset=".48" stop-color="#fa7f9d"></stop><stop offset="1" stop-color="#ba7be9"></stop></lineargradient></defs>
+<circle cx="175" cy="42" fill="#ffffff" opacity=".09" r="48"></circle>
+<path d="M-20 125C34 70 69 135 120 83s83-39 150-92v180H-20Z" fill="#ffffff" opacity=".12"></path>
+<path d="M-20 145C45 55 85 146 140 82s86-30 130-56v150H-20Z" fill="url(#sideWave)" opacity=".95"></path>
+<path d="M-20 157C30 104 73 164 125 116s92-29 145-52v110H-20Z" fill="#f8a4bd" opacity=".5"></path>
+<circle cx="73" cy="52" fill="#ffd9b0" r="4"></circle><circle cx="195" cy="73" fill="#fff" opacity=".7" r="3"></circle>
+</svg>
+</div>
+<a class="nav" href="/login" style="margin-top:18px;" th:href="@{/login}" th:unless="${isAdmin}">
+<span class="symbol"><svg aria-hidden="true" class="ui-icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3"></path><path d="M12 3h6a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3h-6"></path></svg></span> Admin Login
+    </a>
+<form class="logout-form" method="post" th:action="@{/logout}" th:if="${isAdmin}">
+<input th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"/>
+<button class="logout-button" type="submit">
+        ↪ Logout
+      </button>
+</form>
+</aside>
+<!-- =====================================
+         MAIN CONTENT
+    ====================================== -->
+<main class="main">
+<!-- PAGE HEADER -->
+<header class="header">
+<div>
+<div class="page-eyebrow"><span class="eyebrow-dot"></span> MMS / SETTLEMENTS</div><h1>Settlement Management</h1>
+<p class="subtitle">
+                    Manage and track merchant settlements.
+                </p>
+</div>
+
+<div class="admin-pill"><span class="admin-avatar">✦</span><span th:text="${isAdmin} ? 'Administrator' : 'Guest View'">Guest View</span></div></header>
+<!-- =====================================
+             BANNER
+        ====================================== -->
+<section class="banner">
+<div class="banner-content">
+<h2>Settle with confidence.</h2>
+<p>
+                    Review successful payments, create
+                    settlements and maintain a clear
+                    history of completed transactions.
+                </p>
+</div>
+</section>
+<!-- =====================================
+             SUCCESS NOTIFICATIONS
+        ====================================== -->
+<div class="alert alert-success" role="status" th:if="${param.added != null}">
+
+            ✓ Settlement created successfully.
+
+        </div>
+<!-- =====================================
+             ERROR NOTIFICATIONS
+        ====================================== -->
+<div class="alert alert-error" role="alert" th:if="${param.error != null
+                     and param.error[0] == 'invalid'}">
+
+            This payment is not eligible for settlement.
+            It may be unsuccessful or already settled.
+
+        </div>
+<div class="alert alert-error" role="alert" th:if="${param.error != null
+                     and param.error[0] == 'duplicate'}">
+
+            A settlement already exists for this payment.
+            Duplicate settlements are not allowed.
+
+        </div>
+<!-- =====================================
+             SETTLEMENT SUMMARY
+        ====================================== -->
+<section aria-label="Settlement summary" class="settlement-summary">
+<!-- TOTAL SETTLEMENTS -->
+<div class="summary-tile">
+<span class="summary-icon">◈</span>
+<span class="summary-label">
+                    Total Settlements
+                </span>
+<span class="summary-number" th:text="${#lists.size(settlements)}">
+                    0
+                </span>
+<span class="summary-note">
+                    All recorded settlements
+                </span>
+</div>
+<!-- COMPLETED SETTLEMENTS -->
+<div class="summary-tile">
+<span class="summary-icon">✓</span>
+<span class="summary-label">
+                    Completed Settlements
+                </span>
+<span class="summary-number" th:text="${#lists.size(
+                          settlements.?[settlement_status == 'COMPLETED']
+                      )}">
+                    0
+                </span>
+<span class="summary-note">
+                    Successfully completed records
+                </span>
+</div>
+<!-- ELIGIBLE PAYMENTS -->
+<div class="summary-tile">
+<span class="summary-icon">◷</span>
+<span class="summary-label">
+                    Eligible Payments
+                </span>
+<span class="summary-number" th:text="${#lists.size(eligiblePayments)}">
+                    0
+                </span>
+<span class="summary-note">
+                    Successful payments awaiting settlement
+                </span>
+</div>
+</section>
+<!-- =====================================
+             INFORMATION PANEL
+        ====================================== -->
+<div class="info-panel">
+<span class="info-icon">i</span>
+<div>
+<strong>
+                    How settlements work
+                </strong>
+<p>
+                    Only payments marked SUCCESS can be settled.
+                    Each eligible payment can be selected once.
+                    The settlement amount is automatically
+                    taken from the original payment record.
+                </p>
+</div>
+</div>
+<!-- =====================================
+             SETTLEMENT HISTORY
+        ====================================== -->
+<section class="panel">
+<!-- PANEL HEADER -->
+<div class="settlement-toolbar">
+<div>
+<h3>Settlement History</h3>
+<p>
+                        View all merchant settlement records.
+                    </p>
+</div>
+<!-- ADMIN ONLY -->
+<button class="btn primary" onclick="openModal('addSettlementModal')" th:if="${isAdmin}" type="button">
+
+                    + Create Settlement
+
+                </button>
+</div>
+<div class="record-count">
+
+                Showing
+
+                <strong th:text="${#lists.size(settlements)}">
+                    0
+                </strong>
+
+                settlement(s)
+
+            </div>
+<!-- =====================================
+                 SETTLEMENT TABLE
+            ====================================== -->
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Settlement ID</th>
+<th>Payment ID</th>
+<th>Merchant</th>
+<th>Settlement Amount</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<!-- DATABASE RECORDS -->
+<tr th:each="settlement : ${settlements}">
+<!-- SETTLEMENT ID -->
+<td class="settlement-id" th:text="|#${settlement.settlement_id}|">
+                                #1
+                            </td>
+<!-- PAYMENT ID -->
+<td>
+<span class="payment-reference" th:text="|#${settlement.payment_id}|">
+                                    #101
+                                </span>
+</td>
+<!-- MERCHANT NAME -->
+<td class="merchant-name" th:text="${settlement.merchant_name}">
+                                Merchant Name
+                            </td>
+<!-- AMOUNT -->
+<td class="settlement-amount" th:text="|₹${#numbers.formatDecimal(settlement.settlement_amount, 1, 'COMMA', 2, 'POINT')}|">
+                                ₹0.00
+                            </td>
+<!-- STATUS -->
+<td>
+<span class="status" th:classappend="${settlement.settlement_status}" th:text="${settlement.settlement_status}">
+                                    COMPLETED
+                                </span>
+</td>
+</tr>
+<!-- EMPTY STATE -->
+<tr th:if="${#lists.isEmpty(settlements)}">
+<td colspan="5">
+<div class="empty-state">
+<span class="empty-icon">◈</span>
+<strong>
+                                        No settlements yet
+                                    </strong>
+<p>
+                                        Once successful payments
+                                        are settled, their records
+                                        will appear here.
+                                    </p>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- =====================================
+             CREATE SETTLEMENT MODAL
+             ADMIN ONLY
+        ====================================== -->
+<div aria-labelledby="settlementModalTitle" aria-modal="true" class="modal" id="addSettlementModal" role="dialog" th:if="${isAdmin}">
+<div class="modal-box">
+<!-- CLOSE BUTTON -->
+<button aria-label="Close" class="modal-close" onclick="closeModal('addSettlementModal')" type="button">
+                    ×
+                </button>
+<h2 id="settlementModalTitle">
+                    Create Settlement
+                </h2>
+<p class="modal-description">
+                    Select a successful payment
+                    that has not yet been settled.
+                </p>
+<!-- CREATE FORM -->
+<form method="post" onsubmit="return confirmSettlement()" th:action="@{/settlements/add}">
+<!-- ELIGIBLE PAYMENT -->
+<div class="form-field">
+<label for="paymentId">
+                            Eligible Payment
+                        </label>
+<select id="paymentId" name="paymentId" onchange="updateSettlementPreview()" required="">
+<option disabled="" selected="" value="">
+                                Select a successful payment
+                            </option>
+<option th:attr="data-amount=${payment.amount},
+                                             data-merchant=${payment.merchant_name}" th:each="payment : ${eligiblePayments}" th:text="|Payment #${payment.payment_id} - ${payment.merchant_name} - ₹${#numbers.formatDecimal(payment.amount, 1, 'COMMA', 2, 'POINT')}|" th:value="${payment.payment_id}">
+                                Payment
+                            </option>
+</select>
+<p class="form-hint">
+                            Only successful, unsettled
+                            payments are available.
+                        </p>
+</div>
+<!-- SETTLEMENT PREVIEW -->
+<div aria-live="polite" class="settlement-preview">
+<span class="preview-label">
+                            Settlement Amount
+                        </span>
+<span class="preview-amount" id="previewAmount">
+                            ₹0.00
+                        </span>
+<span class="preview-merchant" id="previewMerchant">
+                            Select a payment to see its details.
+                        </span>
+</div>
+<!-- INFORMATION -->
+<div class="settlement-note">
+
+                        The settlement amount is automatically
+                        retrieved from the payment.
+
+                        A successfully created settlement
+                        will have <strong>COMPLETED</strong>
+                        status.
+
+                    </div>
+<!-- FORM BUTTONS -->
+<div class="modal-actions">
+<button class="btn secondary" onclick="closeModal('addSettlementModal')" type="button">
+                            Cancel
+                        </button>
+<button class="btn primary" th:disabled="${#lists.isEmpty(eligiblePayments)}" type="submit">
+                            Create Settlement
+                        </button>
+</div>
+</form>
+<!-- NO ELIGIBLE PAYMENTS -->
+<div class="alert alert-error" style="margin-top:18px;" th:if="${#lists.isEmpty(eligiblePayments)}">
+
+                    No eligible payments are available.
+
+                    Mark a pending payment as SUCCESS
+                    before creating a settlement.
+
+                </div>
+</div>
+</div>
+<!-- =====================================
+             FOOTER
+        ====================================== -->
+<footer class="footer">
+            MMS — Merchant Management System
+        </footer>
+</main>
+<!-- =====================================
+         JAVASCRIPT
+    ====================================== -->
+<script>
+
+        // OPEN MODAL
+        function openModal(modalId) {
+
+            const modal = document.getElementById(modalId);
+
+            if (!modal) {
+                return;
+            }
+
+            modal.classList.add("open");
+
+            document.body.style.overflow = "hidden";
+
+            const firstField = modal.querySelector(
+                "select, input:not([type='hidden'])"
+            );
+
+            if (firstField) {
+                firstField.focus();
+            }
+        }
+
+
+        // CLOSE MODAL
+        function closeModal(modalId) {
+
+            const modal = document.getElementById(modalId);
+
+            if (!modal) {
+                return;
+            }
+
+            modal.classList.remove("open");
+
+            document.body.style.overflow = "";
+        }
+
+
+        // UPDATE SETTLEMENT PREVIEW
+        function updateSettlementPreview() {
+
+            const paymentSelect =
+                document.getElementById("paymentId");
+
+            const amountDisplay =
+                document.getElementById("previewAmount");
+
+            const merchantDisplay =
+                document.getElementById("previewMerchant");
+
+            if (!paymentSelect ||
+                !amountDisplay ||
+                !merchantDisplay) {
+                return;
+            }
+
+            const selectedOption =
+                paymentSelect.options[
+                    paymentSelect.selectedIndex
+                ];
+
+            if (!selectedOption || !selectedOption.value) {
+
+                amountDisplay.textContent = "₹0.00";
+
+                merchantDisplay.textContent =
+                    "Select a payment to see its details.";
+
+                return;
+            }
+
+            const amount = Number(
+                selectedOption.dataset.amount
+            );
+
+            const merchant =
+                selectedOption.dataset.merchant || "";
+
+            if (Number.isFinite(amount)) {
+
+                amountDisplay.textContent =
+                    new Intl.NumberFormat("en-IN", {
+                        style: "currency",
+                        currency: "INR"
+                    }).format(amount);
+
+            } else {
+
+                amountDisplay.textContent = "₹0.00";
+
+            }
+
+            merchantDisplay.textContent =
+                "Merchant: " + merchant;
+        }
+
+
+        // CONFIRM SETTLEMENT
+        function confirmSettlement() {
+
+            const paymentSelect =
+                document.getElementById("paymentId");
+
+            if (!paymentSelect || !paymentSelect.value) {
+                return false;
+            }
+
+            return confirm(
+                "Create a completed settlement for this payment?"
+            );
+        }
+
+
+        // CLOSE WHEN BACKDROP IS CLICKED
+        document.querySelectorAll(".modal").forEach(
+            function(modal) {
+
+                modal.addEventListener(
+                    "click",
+                    function(event) {
+
+                        if (event.target === modal) {
+                            closeModal(modal.id);
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+
+        // CLOSE WITH ESCAPE KEY
+        document.addEventListener(
+            "keydown",
+            function(event) {
+
+                if (event.key === "Escape") {
+
+                    document.querySelectorAll(
+                        ".modal.open"
+                    ).forEach(function(modal) {
+
+                        closeModal(modal.id);
+
+                    });
+
+                }
+
+            }
+        );
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,793 @@
+
+<!DOCTYPE html>
+
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MMS | Payments</title>
+<!-- SHARED MMS THEME -->
+<link rel="stylesheet" th:href="@{/css/mms-theme.css}"/>
+<style>
+        /* =====================================
+           PAYMENTS PAGE STYLES
+        ===================================== */
+
+        .account-controls {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .account-controls form {
+            margin: 0;
+        }
+
+        .payment-summary {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .summary-tile {
+            padding: 21px;
+            border: 1px solid #eee8f5;
+            border-radius: 18px;
+            background: white;
+            box-shadow: 0 7px 20px rgba(57, 30, 100, 0.04);
+        }
+
+        .summary-tile:nth-child(1) {
+            background: #fff0df;
+        }
+
+        .summary-tile:nth-child(2) {
+            background: #e7f8ef;
+        }
+
+        .summary-tile:nth-child(3) {
+            background: #fff2df;
+        }
+
+        .summary-tile:nth-child(4) {
+            background: #ffe9ef;
+        }
+
+        .summary-icon {
+            display: inline-grid;
+            place-items: center;
+            width: 38px;
+            height: 38px;
+            margin-bottom: 13px;
+            border-radius: 11px;
+            background: rgba(255, 255, 255, 0.75);
+            font-size: 19px;
+        }
+
+        .summary-label {
+            display: block;
+            margin-bottom: 7px;
+            color: #706585;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .summary-number {
+            display: block;
+            color: #422173;
+            font-size: 29px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .summary-note {
+            display: block;
+            margin-top: 7px;
+            color: #81748f;
+            font-size: 11px;
+        }
+
+        .payment-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .payment-toolbar h3 {
+            margin: 0 0 5px;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .payment-toolbar p {
+            margin: 0;
+            color: #82799b;
+            font-size: 12px;
+        }
+
+        .filter-form {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
+        .filter-form input {
+            flex: 1;
+            min-width: 180px;
+            max-width: 340px;
+        }
+
+        .filter-form select {
+            min-width: 150px;
+        }
+
+        .filter-form button,
+        .filter-form a {
+            min-height: 43px;
+        }
+
+        .payment-id {
+            color: #82799b;
+            font-weight: 800;
+        }
+
+        .merchant-name {
+            color: #422173;
+            font-weight: 800;
+        }
+
+        .payment-amount {
+            color: #4c267d;
+            font-weight: 800;
+        }
+
+        .payment-method {
+            display: inline-block;
+            padding: 7px 11px;
+            background: #f4efff;
+            color: #7048e4;
+            border-radius: 9px;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .payment-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .payment-actions form {
+            margin: 0;
+        }
+
+        .action-button {
+            padding: 8px 11px;
+            border: none;
+            border-radius: 9px;
+            font-size: 11px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .action-complete {
+            background: #e2f7ec;
+            color: #18875b;
+        }
+
+        .action-fail {
+            background: #ffe7ed;
+            color: #d74769;
+        }
+
+        .action-button:hover {
+            filter: brightness(0.96);
+        }
+
+        .final-status {
+            color: #9389a5;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            float: right;
+            border: none;
+            background: transparent;
+            color: #82799b;
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .modal-description {
+            margin: -5px 0 22px;
+            color: #82799b;
+            font-size: 12px;
+        }
+
+        .form-field {
+            margin-bottom: 17px;
+        }
+
+        .form-field label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .form-field input,
+        .form-field select {
+            width: 100%;
+        }
+
+        .form-hint {
+            margin: 7px 0 0;
+            color: #82799b;
+            font-size: 11px;
+        }
+
+        .payment-note {
+            padding: 13px 15px;
+            margin-top: 18px;
+            background: #f4efff;
+            border-radius: 11px;
+            color: #6d558b;
+            font-size: 12px;
+        }
+
+        .empty-icon {
+            display: block;
+            margin-bottom: 9px;
+            font-size: 30px;
+        }
+
+        .filter-count {
+            margin-bottom: 12px;
+            color: #82799b;
+            font-size: 12px;
+        }
+
+        .filter-count strong {
+            color: #422173;
+        }
+
+        @media (max-width: 1150px) {
+            .payment-summary {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 650px) {
+            .payment-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .payment-toolbar {
+                align-items: stretch;
+            }
+
+            .filter-form {
+                align-items: stretch;
+            }
+
+            .filter-form input,
+            .filter-form select {
+                width: 100%;
+                max-width: none;
+                flex: auto;
+            }
+
+            .payment-toolbar > button {
+                width: 100%;
+            }
+        }
+    </style>
+<link rel="stylesheet" th:href="@{/css/premium-pages.css}"/>
+<link rel="stylesheet" th:href="@{/css/premium-unified.css(v=3)}"/></head>
+<body>
+<!-- =====================================
+         SIDEBAR
+    ====================================== -->
+<aside class="sidebar">
+<div class="mms-brand">
+<div class="mms-logo">m</div>
+<div>
+<div class="mms-name">MMS</div>
+<div class="mms-caption">MERCHANT MANAGEMENT SYSTEM</div>
+</div>
+</div>
+<div class="nav-label">WORKSPACE</div>
+<a class="nav" href="/" th:href="@{/}">
+<span class="symbol"><svg aria-hidden="true" class="ui-icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"></path></svg></span> Dashboard
+    </a>
+<a class="nav" href="/merchants" th:href="@{/merchants}">
+<span class="symbol"><svg aria-hidden="true" class="ui-icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span> Merchants
+    </a>
+<a aria-current="page" class="nav active" href="/payments" th:href="@{/payments}">
+<span class="symbol"><svg aria-hidden="true" class="ui-icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><rect height="14" rx="3" width="20" x="2" y="5"></rect><path d="M2 10h20"></path></svg></span> Payments
+    </a>
+<a class="nav" href="/settlements" th:href="@{/settlements}">
+<span class="symbol"><svg aria-hidden="true" class="ui-icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><rect height="6" rx="1.5" width="18" x="3" y="3"></rect><rect height="9" rx="1.5" width="18" x="3" y="12"></rect><path d="M7 16h5"></path></svg></span> Settlements
+    </a>
+<a class="nav" href="/reports" th:href="@{/reports}">
+<span class="symbol"><svg aria-hidden="true" class="ui-icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><path d="M3 3v18h18"></path><path d="m7 16 4-5 4 3 5-7"></path></svg></span> Reports
+    </a>
+<div aria-hidden="true" class="sidebar-bottom">
+<svg preserveaspectratio="xMidYMax slice" viewbox="0 0 250 155" xmlns="http://www.w3.org/2000/svg">
+<defs><lineargradient id="sideWave" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#ffa76c"></stop><stop offset=".48" stop-color="#fa7f9d"></stop><stop offset="1" stop-color="#ba7be9"></stop></lineargradient></defs>
+<circle cx="175" cy="42" fill="#ffffff" opacity=".09" r="48"></circle>
+<path d="M-20 125C34 70 69 135 120 83s83-39 150-92v180H-20Z" fill="#ffffff" opacity=".12"></path>
+<path d="M-20 145C45 55 85 146 140 82s86-30 130-56v150H-20Z" fill="url(#sideWave)" opacity=".95"></path>
+<path d="M-20 157C30 104 73 164 125 116s92-29 145-52v110H-20Z" fill="#f8a4bd" opacity=".5"></path>
+<circle cx="73" cy="52" fill="#ffd9b0" r="4"></circle><circle cx="195" cy="73" fill="#fff" opacity=".7" r="3"></circle>
+</svg>
+</div>
+<a class="nav" href="/login" style="margin-top:18px;" th:href="@{/login}" th:unless="${isAdmin}">
+<span class="symbol"><svg aria-hidden="true" class="ui-icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3"></path><path d="M12 3h6a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3h-6"></path></svg></span> Admin Login
+    </a>
+<form class="logout-form" method="post" th:action="@{/logout}" th:if="${isAdmin}">
+<input th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"/>
+<button class="logout-button" type="submit">
+        ↪ Logout
+      </button>
+</form>
+</aside>
+<!-- =====================================
+         MAIN CONTENT
+    ====================================== -->
+<main class="main">
+<!-- PAGE HEADER -->
+<header class="header">
+<div>
+<div class="page-eyebrow"><span class="eyebrow-dot"></span> MMS / PAYMENTS</div><h1>Payment Management</h1>
+<p class="subtitle">
+                    Track and manage merchant transactions.
+                </p>
+</div>
+
+<div class="admin-pill"><span class="admin-avatar">✦</span><span th:text="${isAdmin} ? 'Administrator' : 'Guest View'">Guest View</span></div></header>
+<!-- =====================================
+             WELCOME BANNER
+        ====================================== -->
+<section class="banner">
+<div class="banner-content">
+<h2>Every transaction matters.</h2>
+<p>
+                    Create payments, monitor transaction
+                    statuses and keep your merchant
+                    payment records organized.
+                </p>
+</div>
+</section>
+<!-- =====================================
+             SUCCESS MESSAGES
+        ====================================== -->
+<div class="alert alert-success" role="status" th:if="${param.added != null}">
+            ✓ Payment created successfully.
+            Its initial status is PENDING.
+        </div>
+<div class="alert alert-success" role="status" th:if="${param.completed != null}">
+            ✓ Payment marked as SUCCESS.
+        </div>
+<div class="alert alert-success" role="status" th:if="${param.failed != null}">
+            ✓ Payment marked as FAILED.
+        </div>
+<!-- =====================================
+             ERROR MESSAGES
+        ====================================== -->
+<div class="alert alert-error" role="alert" th:if="${param.error != null
+                     and param.error[0] == 'amount'}">
+            Payment amount must be greater than zero.
+        </div>
+<div class="alert alert-error" role="alert" th:if="${param.error != null
+                     and param.error[0] == 'merchant'}">
+            The selected merchant is unavailable
+            or is not ACTIVE.
+        </div>
+<div class="alert alert-error" role="alert" th:if="${param.error != null
+                     and param.error[0] == 'method'}">
+            Please select a valid payment method.
+        </div>
+<div class="alert alert-error" role="alert" th:if="${param.error != null
+                     and param.error[0] == 'invalidStatus'}">
+            This payment cannot be updated.
+            Only PENDING payments can change status.
+        </div>
+<!-- =====================================
+             PAYMENT SUMMARY
+             COUNTS FOR CURRENT FILTER
+        ====================================== -->
+<section aria-label="Payment summary" class="payment-summary">
+<!-- TOTAL -->
+<div class="summary-tile">
+<span class="summary-icon">💳</span>
+<span class="summary-label">
+                    Payments in Current View
+                </span>
+<span class="summary-number" th:text="${#lists.size(payments)}">
+                    0
+                </span>
+<span class="summary-note">
+                    Matching your current filters
+                </span>
+</div>
+<!-- SUCCESS -->
+<div class="summary-tile">
+<span class="summary-icon">✓</span>
+<span class="summary-label">
+                    Successful
+                </span>
+<span class="summary-number" th:text="${#lists.size(
+                          payments.?[payment_status == 'SUCCESS']
+                      )}">
+                    0
+                </span>
+<span class="summary-note">
+                    Completed transactions in view
+                </span>
+</div>
+<!-- PENDING -->
+<div class="summary-tile">
+<span class="summary-icon">◷</span>
+<span class="summary-label">
+                    Pending
+                </span>
+<span class="summary-number" th:text="${#lists.size(
+                          payments.?[payment_status == 'PENDING']
+                      )}">
+                    0
+                </span>
+<span class="summary-note">
+                    Awaiting a final status
+                </span>
+</div>
+<!-- FAILED -->
+<div class="summary-tile">
+<span class="summary-icon">✕</span>
+<span class="summary-label">
+                    Failed
+                </span>
+<span class="summary-number" th:text="${#lists.size(
+                          payments.?[payment_status == 'FAILED']
+                      )}">
+                    0
+                </span>
+<span class="summary-note">
+                    Unsuccessful transactions in view
+                </span>
+</div>
+</section>
+<!-- =====================================
+             TRANSACTION DIRECTORY
+        ====================================== -->
+<section class="panel">
+<!-- PANEL HEADER -->
+<div class="payment-toolbar">
+<div>
+<h3>Transaction History</h3>
+<p>
+                        Search, filter and review
+                        payment records.
+                    </p>
+</div>
+<!-- ADMIN ONLY -->
+<button class="btn primary" onclick="openModal('addPaymentModal')" th:if="${isAdmin}" type="button">
+                    + New Payment
+                </button>
+</div>
+<!-- =====================================
+                 SEARCH AND STATUS FILTER
+            ====================================== -->
+<form class="filter-form" method="get" th:action="@{/payments}">
+<input aria-label="Search payments" name="search" placeholder="Search merchant, ID or method..." th:value="${search}" type="search"/>
+<select aria-label="Filter by payment status" name="status">
+<option th:selected="${status == 'ALL'}" value="ALL">
+                        All Statuses
+                    </option>
+<option th:selected="${status == 'PENDING'}" value="PENDING">
+                        Pending
+                    </option>
+<option th:selected="${status == 'SUCCESS'}" value="SUCCESS">
+                        Successful
+                    </option>
+<option th:selected="${status == 'FAILED'}" value="FAILED">
+                        Failed
+                    </option>
+</select>
+<button class="btn primary" type="submit">
+                    Apply Filters
+                </button>
+<a class="btn secondary" th:href="@{/payments}">
+                    Clear
+                </a>
+</form>
+<div class="filter-count">
+
+                Showing
+                <strong th:text="${#lists.size(payments)}">
+                    0
+                </strong>
+                transaction(s)
+
+            </div>
+<!-- =====================================
+                 PAYMENTS TABLE
+            ====================================== -->
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Payment ID</th>
+<th>Merchant</th>
+<th>Amount</th>
+<th>Payment Method</th>
+<th>Status</th>
+<th th:if="${isAdmin}">
+                                Actions
+                            </th>
+</tr>
+</thead>
+<tbody>
+<!-- MYSQL PAYMENT RECORDS -->
+<tr th:each="payment : ${payments}">
+<!-- PAYMENT ID -->
+<td class="payment-id" th:text="|#${payment.payment_id}|">
+                                #101
+                            </td>
+<!-- MERCHANT NAME -->
+<td class="merchant-name" th:text="${payment.merchant_name}">
+                                Merchant Name
+                            </td>
+<!-- AMOUNT -->
+<td class="payment-amount" th:text="|₹${#numbers.formatDecimal(payment.amount, 1, 'COMMA', 2, 'POINT')}|">
+                                ₹0.00
+                            </td>
+<!-- PAYMENT METHOD -->
+<td>
+<span class="payment-method" th:text="${payment.payment_method}">
+                                    UPI
+                                </span>
+</td>
+<!-- PAYMENT STATUS -->
+<td>
+<span class="status" th:classappend="${payment.payment_status}" th:text="${payment.payment_status}">
+                                    PENDING
+                                </span>
+</td>
+<!-- ADMIN ACTIONS -->
+<td th:if="${isAdmin}">
+<!-- ONLY PENDING PAYMENTS CAN CHANGE -->
+<div class="payment-actions" th:if="${payment.payment_status == 'PENDING'}">
+<!-- MARK SUCCESS -->
+<form method="post" onsubmit="return confirm('Mark this payment as SUCCESS?')" th:action="@{/payments/complete}">
+<input name="paymentId" th:value="${payment.payment_id}" type="hidden"/>
+<button class="action-button action-complete" type="submit">
+                                            ✓ Complete
+                                        </button>
+</form>
+<!-- MARK FAILED -->
+<form method="post" onsubmit="return confirm('Mark this payment as FAILED?')" th:action="@{/payments/fail}">
+<input name="paymentId" th:value="${payment.payment_id}" type="hidden"/>
+<button class="action-button action-fail" type="submit">
+                                            ✕ Fail
+                                        </button>
+</form>
+</div>
+<!-- FINAL STATUS -->
+<span class="final-status" th:unless="${payment.payment_status == 'PENDING'}">
+                                    Finalized
+                                </span>
+</td>
+</tr>
+<!-- EMPTY STATE -->
+<tr th:if="${#lists.isEmpty(payments)}">
+<td th:colspan="${isAdmin} ? 6 : 5">
+<div class="empty-state">
+<span class="empty-icon">
+                                        💳
+                                    </span>
+<strong>
+                                        No payments found
+                                    </strong>
+<p>
+                                        Try changing your filters
+                                        or create a new payment
+                                        if you are an administrator.
+                                    </p>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- =====================================
+             ADD PAYMENT MODAL
+             ADMIN ONLY
+        ====================================== -->
+<div aria-labelledby="addPaymentModalTitle" aria-modal="true" class="modal" id="addPaymentModal" role="dialog" th:if="${isAdmin}">
+<div class="modal-box">
+<!-- CLOSE -->
+<button aria-label="Close" class="modal-close" onclick="closeModal('addPaymentModal')" type="button">
+                    ×
+                </button>
+<h2 id="addPaymentModalTitle">
+                    Create New Payment
+                </h2>
+<p class="modal-description">
+                    Record a payment for an active merchant.
+                </p>
+<!-- ADD PAYMENT FORM -->
+<form method="post" th:action="@{/payments/add}">
+<!-- MERCHANT -->
+<div class="form-field">
+<label for="merchantId">
+                            Select Merchant
+                        </label>
+<select id="merchantId" name="merchantId" required="">
+<option disabled="" selected="" value="">
+                                Choose an active merchant
+                            </option>
+<option th:each="merchant : ${merchants}" th:text="|#${merchant.merchant_id} - ${merchant.merchant_name}|" th:value="${merchant.merchant_id}">
+                                Merchant
+                            </option>
+</select>
+<p class="form-hint">
+                            Only ACTIVE merchants appear here.
+                        </p>
+</div>
+<!-- AMOUNT -->
+<div class="form-field">
+<label for="paymentAmount">
+                            Payment Amount (₹)
+                        </label>
+<input id="paymentAmount" min="0.01" name="amount" placeholder="Enter payment amount" required="" step="0.01" type="number"/>
+<p class="form-hint">
+                            Enter an amount greater than zero.
+                        </p>
+</div>
+<!-- PAYMENT METHOD -->
+<div class="form-field">
+<label for="paymentMethod">
+                            Payment Method
+                        </label>
+<select id="paymentMethod" name="paymentMethod" required="">
+<option disabled="" selected="" value="">
+                                Choose a payment method
+                            </option>
+<option value="UPI">
+                                UPI
+                            </option>
+<option value="CARD">
+                                Card
+                            </option>
+<option value="NET BANKING">
+                                Net Banking
+                            </option>
+<option value="WALLET">
+                                Wallet
+                            </option>
+</select>
+</div>
+<!-- INFORMATION -->
+<div class="payment-note">
+
+                        New payments are created with
+                        <strong>PENDING</strong> status.
+
+                        You can later mark the payment
+                        as SUCCESS or FAILED.
+
+                    </div>
+<!-- FORM ACTIONS -->
+<div class="modal-actions">
+<button class="btn secondary" onclick="closeModal('addPaymentModal')" type="button">
+                            Cancel
+                        </button>
+<button class="btn primary" th:disabled="${#lists.isEmpty(merchants)}" type="submit">
+                            Create Payment
+                        </button>
+</div>
+</form>
+<!-- NO ACTIVE MERCHANTS -->
+<div class="alert alert-error" style="margin-top:18px;" th:if="${#lists.isEmpty(merchants)}">
+
+                    No active merchants are available.
+                    Activate or add a merchant first.
+
+                </div>
+</div>
+</div>
+<!-- =====================================
+             FOOTER
+        ====================================== -->
+<footer class="footer">
+            MMS — Merchant Management System
+        </footer>
+</main>
+<!-- =====================================
+         JAVASCRIPT
+    ====================================== -->
+<script>
+
+        // OPEN MODAL
+        function openModal(modalId) {
+
+            const modal = document.getElementById(modalId);
+
+            if (!modal) {
+                return;
+            }
+
+            modal.classList.add("open");
+
+            document.body.style.overflow = "hidden";
+
+            const firstField = modal.querySelector(
+                'select:not([disabled]), input:not([type="hidden"])'
+            );
+
+            if (firstField) {
+                firstField.focus();
+            }
+        }
+
+
+        // CLOSE MODAL
+        function closeModal(modalId) {
+
+            const modal = document.getElementById(modalId);
+
+            if (!modal) {
+                return;
+            }
+
+            modal.classList.remove("open");
+
+            document.body.style.overflow = "";
+        }
+
+
+        // CLOSE MODAL BY CLICKING OUTSIDE
+        document.querySelectorAll(".modal").forEach(
+            function(modal) {
+
+                modal.addEventListener("click", function(event) {
+
+                    if (event.target === modal) {
+                        closeModal(modal.id);
+                    }
+
+                });
+
+            }
+        );
+
+
+        // CLOSE MODAL WITH ESCAPE
+        document.addEventListener("keydown", function(event) {
+
+            if (event.key === "Escape") {
+
+                document.querySelectorAll(
+                    ".modal.open"
+                ).forEach(function(modal) {
+
+                    closeModal(modal.id);
+
+                });
+
+            }
+
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+/* MMS premium sidebar — matches the dashboard, without changing page functionality. */
+:root { --sidebar-width:250px; --background:#fffaf8; --ink:#30253d; --line:#f0e9f4; }
+.sidebar {width:250px; padding:28px 18px; background:linear-gradient(175deg,#4d218f,#6d38bc 60%,#8d50d3); box-shadow:8px 0 28px rgba(46,20,92,.10);}
+.sidebar::after {display:none;}
+.mms-brand {display:flex;align-items:center;gap:12px;margin:0 0 38px 8px;position:relative;z-index:2;}
+.mms-logo {display:grid;place-items:center;width:45px;height:45px;flex:none;border-radius:14px;background:linear-gradient(135deg,#ffb778,#ff6d9b);color:#fff;font-size:23px;font-weight:900;box-shadow:0 8px 20px #2e145a44;}
+.mms-name {font-size:27px;font-weight:900;line-height:1;color:#fff;letter-spacing:-.5px;}
+.mms-caption {margin-top:6px;color:#eee0ff;font-size:8px;font-weight:800;letter-spacing:.25px;}
+.nav-label {margin:0 0 18px 20px;color:#e3d3f7;font-size:10px;font-weight:800;letter-spacing:1.5px;}
+.sidebar .nav {display:flex;align-items:center;gap:13px;margin:0 3px 8px;padding:12px 15px;border-radius:11px;color:#e9ddff;font-size:13px;font-weight:700;box-shadow:none;transition:background .2s,color .2s;}
+.sidebar .nav:hover {background:rgba(255,255,255,.13);color:#fff;transform:none;}
+.sidebar .nav.active {background:rgba(255,255,255,.17);box-shadow:inset 3px 0 #ffb778;color:#fff;}
+.sidebar .nav .symbol {width:23px;flex:none;text-align:center;font-size:18px;}
+.sidebar-foot {margin:35px 12px 0;color:#d9c9f4;font-size:11px;}
+.main {margin-left:250px;background:#fffaf8;min-height:100vh;}
+@media(max-width:900px){.sidebar{width:210px}.main{margin-left:210px}}
+@media(max-width:650px){.sidebar{position:relative;width:100%;padding:17px}.mms-brand{margin-bottom:16px}.sidebar-foot{display:none}.main{margin-left:0}}

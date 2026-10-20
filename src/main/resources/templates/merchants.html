@@ -1,0 +1,706 @@
+
+<!DOCTYPE html>
+
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MMS | Merchants</title>
+<link rel="stylesheet" th:href="@{/css/mms-theme.css}"/>
+<style>
+        /* MERCHANT PAGE STYLES */
+
+        .merchant-summary {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 15px;
+            margin-bottom: 24px;
+        }
+
+        .summary-tile {
+            padding: 20px;
+            background: white;
+            border: 1px solid #eee8f5;
+            border-radius: 17px;
+            box-shadow: 0 7px 20px rgba(57, 30, 100, 0.04);
+        }
+
+        .summary-tile:nth-child(2) {
+            background: #f1ebff;
+        }
+
+        .summary-tile:nth-child(3) {
+            background: #fff0e7;
+        }
+
+        .summary-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #766b8b;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .summary-number {
+            display: block;
+            color: #422173;
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .merchant-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 23px;
+        }
+
+        .merchant-search {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 9px;
+            flex: 1;
+        }
+
+        .merchant-search input {
+            width: min(100%, 340px);
+        }
+
+        .merchant-search button {
+            min-height: 43px;
+        }
+
+        .merchant-name {
+            color: #422173;
+            font-weight: 800;
+        }
+
+        .merchant-id {
+            font-weight: 800;
+            color: #82799b;
+        }
+
+        .merchant-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .merchant-actions form {
+            margin: 0;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 33px;
+            padding: 7px 11px;
+            border: 0;
+            border-radius: 9px;
+            font-size: 11px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .action-edit {
+            color: #7048e4;
+            background: #f0eaff;
+        }
+
+        .action-status {
+            color: #b8751e;
+            background: #fff0de;
+        }
+
+        .action-activate {
+            color: #18875b;
+            background: #e2f7ec;
+        }
+
+        .action-delete {
+            color: #d74769;
+            background: #ffe7ed;
+        }
+
+        .action-btn:hover {
+            filter: brightness(0.96);
+        }
+
+        .modal-close {
+            float: right;
+            border: none;
+            background: transparent;
+            color: #82799b;
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .modal-description {
+            margin: -6px 0 20px;
+            color: #82799b;
+            font-size: 12px;
+        }
+
+        .form-field {
+            margin-bottom: 16px;
+        }
+
+        .form-field label {
+            display: block;
+            margin-bottom: 7px;
+        }
+
+        .form-field input,
+        .form-field select {
+            width: 100%;
+        }
+
+        .form-hint {
+            margin-top: 6px;
+            color: #82799b;
+            font-size: 11px;
+        }
+
+        .confirmation-box {
+            padding: 14px;
+            background: #fff1e8;
+            border-radius: 12px;
+            color: #805b44;
+            font-size: 13px;
+        }
+
+        .panel-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .panel-subtitle {
+            margin: 4px 0 0;
+            color: #82799b;
+            font-size: 12px;
+        }
+
+        .empty-icon {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 30px;
+        }
+
+        .login-link {
+            text-decoration: none;
+        }
+
+        @media (max-width: 900px) {
+            .merchant-summary {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .merchant-toolbar {
+                align-items: stretch;
+            }
+
+            .merchant-search {
+                width: 100%;
+            }
+
+            .merchant-search input {
+                flex: 1;
+                min-width: 0;
+            }
+        }
+    </style>
+<link rel="stylesheet" th:href="@{/css/premium-pages.css}"/>
+<link rel="stylesheet" th:href="@{/css/premium-unified.css(v=3)}"/></head>
+<body>
+<!-- ================================
+         SIDEBAR
+    ================================= -->
+<aside class="sidebar">
+<div class="mms-brand">
+<div class="mms-logo">m</div>
+<div>
+<div class="mms-name">MMS</div>
+<div class="mms-caption">MERCHANT MANAGEMENT SYSTEM</div>
+</div>
+</div>
+<div class="nav-label">WORKSPACE</div>
+<a class="nav" href="/" th:href="@{/}">
+<span class="symbol"><svg aria-hidden="true" class="ui-icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"></path></svg></span> Dashboard
+    </a>
+<a aria-current="page" class="nav active" href="/merchants" th:href="@{/merchants}">
+<span class="symbol"><svg aria-hidden="true" class="ui-icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span> Merchants
+    </a>
+<a class="nav" href="/payments" th:href="@{/payments}">
+<span class="symbol"><svg aria-hidden="true" class="ui-icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><rect height="14" rx="3" width="20" x="2" y="5"></rect><path d="M2 10h20"></path></svg></span> Payments
+    </a>
+<a class="nav" href="/settlements" th:href="@{/settlements}">
+<span class="symbol"><svg aria-hidden="true" class="ui-icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><rect height="6" rx="1.5" width="18" x="3" y="3"></rect><rect height="9" rx="1.5" width="18" x="3" y="12"></rect><path d="M7 16h5"></path></svg></span> Settlements
+    </a>
+<a class="nav" href="/reports" th:href="@{/reports}">
+<span class="symbol"><svg aria-hidden="true" class="ui-icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><path d="M3 3v18h18"></path><path d="m7 16 4-5 4 3 5-7"></path></svg></span> Reports
+    </a>
+<div aria-hidden="true" class="sidebar-bottom">
+<svg preserveaspectratio="xMidYMax slice" viewbox="0 0 250 155" xmlns="http://www.w3.org/2000/svg">
+<defs><lineargradient id="sideWave" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#ffa76c"></stop><stop offset=".48" stop-color="#fa7f9d"></stop><stop offset="1" stop-color="#ba7be9"></stop></lineargradient></defs>
+<circle cx="175" cy="42" fill="#ffffff" opacity=".09" r="48"></circle>
+<path d="M-20 125C34 70 69 135 120 83s83-39 150-92v180H-20Z" fill="#ffffff" opacity=".12"></path>
+<path d="M-20 145C45 55 85 146 140 82s86-30 130-56v150H-20Z" fill="url(#sideWave)" opacity=".95"></path>
+<path d="M-20 157C30 104 73 164 125 116s92-29 145-52v110H-20Z" fill="#f8a4bd" opacity=".5"></path>
+<circle cx="73" cy="52" fill="#ffd9b0" r="4"></circle><circle cx="195" cy="73" fill="#fff" opacity=".7" r="3"></circle>
+</svg>
+</div>
+<a class="nav" href="/login" style="margin-top:18px;" th:href="@{/login}" th:unless="${isAdmin}">
+<span class="symbol"><svg aria-hidden="true" class="ui-icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3"></path><path d="M12 3h6a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3h-6"></path></svg></span> Admin Login
+    </a>
+<form class="logout-form" method="post" th:action="@{/logout}" th:if="${isAdmin}">
+<input th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"/>
+<button class="logout-button" type="submit">
+        ↪ Logout
+      </button>
+</form>
+</aside>
+<!-- ================================
+         MAIN CONTENT
+    ================================= -->
+<main class="main">
+<!-- PAGE HEADER -->
+<header class="header">
+<div>
+<div class="page-eyebrow"><span class="eyebrow-dot"></span> MMS / MERCHANTS</div><h1>Merchant Management</h1>
+<p class="subtitle">
+                    Manage your registered business partners.
+                </p>
+</div>
+
+<div class="admin-pill"><span class="admin-avatar">✦</span><span th:text="${isAdmin} ? 'Administrator' : 'Guest View'">Guest View</span></div></header>
+<!-- ================================
+             BANNER
+        ================================= -->
+<section class="banner">
+<div class="banner-content">
+<h2>Grow with every merchant.</h2>
+<p>
+                    Keep your merchant directory organized,
+                    update business details, and manage
+                    account status from one place.
+                </p>
+</div>
+</section>
+<!-- ================================
+             SUCCESS NOTIFICATIONS
+        ================================= -->
+<div class="alert alert-success" role="status" th:if="${param.added != null}">
+            ✓ Merchant added successfully.
+        </div>
+<div class="alert alert-success" role="status" th:if="${param.updated != null}">
+            ✓ Merchant details updated successfully.
+        </div>
+<div class="alert alert-success" role="status" th:if="${param.statusChanged != null}">
+            ✓ Merchant status changed successfully.
+        </div>
+<div class="alert alert-success" role="status" th:if="${param.deleted != null}">
+            ✓ Merchant deleted successfully.
+        </div>
+<!-- ================================
+             ERROR NOTIFICATIONS
+        ================================= -->
+<div class="alert alert-error" role="alert" th:if="${param.error != null
+                     and param.error[0] == 'hasPayments'}">
+            This merchant cannot be deleted because
+            related payment or settlement records exist.
+        </div>
+<div class="alert alert-error" role="alert" th:if="${param.error != null
+                     and param.error[0] == 'invalid'}">
+            Please enter a valid merchant name
+            and business type.
+        </div>
+<div class="alert alert-error" role="alert" th:if="${param.error != null
+                     and param.error[0] == 'notFound'}">
+            Merchant not found. Please refresh
+            and try again.
+        </div>
+<!-- ================================
+             MERCHANT SUMMARY
+        ================================= -->
+<section aria-label="Merchant summary" class="merchant-summary">
+<div class="summary-tile">
+<span class="summary-label">
+                    Merchants in Current View
+                </span>
+<span class="summary-number" th:text="${#lists.size(merchants)}">
+                    0
+                </span>
+</div>
+<div class="summary-tile">
+<span class="summary-label">
+                    Active in Current View
+                </span>
+<span class="summary-number" th:text="${#aggregates.sum(
+                          merchants.![status == 'ACTIVE' ? 1 : 0]
+                      ) ?: 0}">
+                    0
+                </span>
+</div>
+<div class="summary-tile">
+<span class="summary-label">
+                    Inactive in Current View
+                </span>
+<span class="summary-number" th:text="${#aggregates.sum(
+                          merchants.![status == 'INACTIVE' ? 1 : 0]
+                      ) ?: 0}">
+                    0
+                </span>
+</div>
+</section>
+<!-- ================================
+             MERCHANT DIRECTORY
+        ================================= -->
+<section class="panel">
+<div class="merchant-toolbar">
+<div>
+<h3 class="panel-title">
+                        Merchant Directory
+                    </h3>
+<p class="panel-subtitle">
+                        Search, review and manage merchant records.
+                    </p>
+</div>
+<!-- ADMIN ONLY -->
+<button class="btn primary" onclick="openModal('addModal')" th:if="${isAdmin}" type="button">
+                    + Add Merchant
+                </button>
+</div>
+<!-- SEARCH BAR -->
+<form class="merchant-search" method="get" th:action="@{/merchants}">
+<input aria-label="Search merchants" name="search" placeholder="Search name, business type or ID..." th:value="${search}" type="search"/>
+<button class="btn primary" type="submit">
+                    Search
+                </button>
+<a class="btn secondary" th:href="@{/merchants}" th:if="${search != null and !search.isEmpty()}">
+                    Clear
+                </a>
+</form>
+<!-- ================================
+                 MERCHANT TABLE
+            ================================= -->
+<div class="table-wrap" style="margin-top:22px;">
+<table>
+<thead>
+<tr>
+<th>Merchant ID</th>
+<th>Merchant Name</th>
+<th>Business Type</th>
+<th>Status</th>
+<th th:if="${isAdmin}">
+                                Actions
+                            </th>
+</tr>
+</thead>
+<tbody>
+<!-- REAL DATABASE RECORDS -->
+<tr th:each="merchant : ${merchants}">
+<td class="merchant-id" th:text="|#${merchant.merchant_id}|">
+                                #1
+                            </td>
+<td class="merchant-name" th:text="${merchant.merchant_name}">
+                                Merchant Name
+                            </td>
+<td th:text="${merchant.business_type}">
+                                Retail
+                            </td>
+<td>
+<span class="status" th:classappend="${merchant.status}" th:text="${merchant.status}">
+                                    ACTIVE
+                                </span>
+</td>
+<!-- ADMIN ACTIONS -->
+<td th:if="${isAdmin}">
+<div class="merchant-actions">
+<!-- EDIT -->
+<button class="action-btn action-edit" onclick="openEditModal(this)" th:attr="data-id=${merchant.merchant_id},
+                                                     data-name=${merchant.merchant_name},
+                                                     data-type=${merchant.business_type}" type="button">
+                                        Edit
+                                    </button>
+<!-- ACTIVATE / DEACTIVATE -->
+<form method="post" th:action="@{/merchants/status}">
+<input name="merchantId" th:value="${merchant.merchant_id}" type="hidden"/>
+<button class="action-btn" onclick="return confirm('Change this merchant status?')" th:classappend="${merchant.status == 'ACTIVE'}
+                                                    ? ' action-status'
+                                                    : ' action-activate'" th:text="${merchant.status == 'ACTIVE'}
+                                                    ? 'Deactivate'
+                                                    : 'Activate'" type="submit">
+                                            Deactivate
+                                        </button>
+</form>
+<!-- DELETE -->
+<button class="action-btn action-delete" onclick="openDeleteModal(this)" th:attr="data-id=${merchant.merchant_id},
+                                                     data-name=${merchant.merchant_name}" type="button">
+                                        Delete
+                                    </button>
+</div>
+</td>
+</tr>
+<!-- EMPTY SEARCH RESULT -->
+<tr th:if="${#lists.isEmpty(merchants)}">
+<td th:colspan="${isAdmin} ? 5 : 4">
+<div class="empty-state">
+<span class="empty-icon">▣</span>
+<strong>No merchants found</strong>
+<p>
+                                        Try another search or add a new
+                                        merchant if you are an administrator.
+                                    </p>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- ================================
+             ADD MERCHANT MODAL
+             ADMIN ONLY
+        ================================= -->
+<div aria-labelledby="addModalTitle" aria-modal="true" class="modal" id="addModal" role="dialog" th:if="${isAdmin}">
+<div class="modal-box">
+<button aria-label="Close" class="modal-close" onclick="closeModal('addModal')" type="button">
+                    ×
+                </button>
+<h2 id="addModalTitle">
+                    Add New Merchant
+                </h2>
+<p class="modal-description">
+                    Register a new business partner.
+                </p>
+<form method="post" th:action="@{/merchants/add}">
+<div class="form-field">
+<label for="addMerchantName">
+                            Merchant Name
+                        </label>
+<input id="addMerchantName" maxlength="150" name="merchantName" placeholder="Enter merchant name" required="" type="text"/>
+</div>
+<div class="form-field">
+<label for="addBusinessType">
+                            Business Type
+                        </label>
+<input id="addBusinessType" maxlength="100" name="businessType" placeholder="e.g. Retail, Grocery, Electronics" required="" type="text"/>
+<p class="form-hint">
+                            New merchants are automatically ACTIVE.
+                        </p>
+</div>
+<div class="modal-actions">
+<button class="btn secondary" onclick="closeModal('addModal')" type="button">
+                            Cancel
+                        </button>
+<button class="btn primary" type="submit">
+                            Add Merchant
+                        </button>
+</div>
+</form>
+</div>
+</div>
+<!-- ================================
+             EDIT MERCHANT MODAL
+             ADMIN ONLY
+        ================================= -->
+<div aria-labelledby="editModalTitle" aria-modal="true" class="modal" id="editModal" role="dialog" th:if="${isAdmin}">
+<div class="modal-box">
+<button aria-label="Close" class="modal-close" onclick="closeModal('editModal')" type="button">
+                    ×
+                </button>
+<h2 id="editModalTitle">
+                    Edit Merchant
+                </h2>
+<p class="modal-description">
+                    Update merchant information.
+                </p>
+<form method="post" th:action="@{/merchants/edit}">
+<input id="editMerchantId" name="merchantId" type="hidden"/>
+<div class="form-field">
+<label for="editMerchantName">
+                            Merchant Name
+                        </label>
+<input id="editMerchantName" maxlength="150" name="merchantName" required="" type="text"/>
+</div>
+<div class="form-field">
+<label for="editBusinessType">
+                            Business Type
+                        </label>
+<input id="editBusinessType" maxlength="100" name="businessType" required="" type="text"/>
+</div>
+<div class="modal-actions">
+<button class="btn secondary" onclick="closeModal('editModal')" type="button">
+                            Cancel
+                        </button>
+<button class="btn primary" type="submit">
+                            Save Changes
+                        </button>
+</div>
+</form>
+</div>
+</div>
+<!-- ================================
+             DELETE CONFIRMATION MODAL
+             ADMIN ONLY
+        ================================= -->
+<div aria-labelledby="deleteModalTitle" aria-modal="true" class="modal" id="deleteModal" role="dialog" th:if="${isAdmin}">
+<div class="modal-box">
+<button aria-label="Close" class="modal-close" onclick="closeModal('deleteModal')" type="button">
+                    ×
+                </button>
+<h2 id="deleteModalTitle">
+                    Delete Merchant?
+                </h2>
+<p class="modal-description">
+                    You are about to delete:
+                </p>
+<div class="confirmation-box">
+<strong id="deleteMerchantDisplay">
+                        Merchant Name
+                    </strong>
+<p style="margin-bottom:0;">
+                        This action cannot be undone.
+                        Merchants with payment history
+                        cannot be deleted.
+                    </p>
+</div>
+<form method="post" th:action="@{/merchants/delete}">
+<input id="deleteMerchantId" name="merchantId" type="hidden"/>
+<div class="modal-actions">
+<button class="btn secondary" onclick="closeModal('deleteModal')" type="button">
+                            Cancel
+                        </button>
+<button class="btn danger" type="submit">
+                            Delete Merchant
+                        </button>
+</div>
+</form>
+</div>
+</div>
+<!-- FOOTER -->
+<footer class="footer">
+            MMS — Merchant Management System
+        </footer>
+</main>
+<!-- ================================
+         JAVASCRIPT
+    ================================= -->
+<script>
+
+        // OPEN MODAL
+        function openModal(modalId) {
+
+            const modal = document.getElementById(modalId);
+
+            if (!modal) {
+                return;
+            }
+
+            modal.classList.add("open");
+
+            document.body.style.overflow = "hidden";
+
+            const firstInput = modal.querySelector(
+                'input:not([type="hidden"])'
+            );
+
+            if (firstInput) {
+                firstInput.focus();
+            }
+        }
+
+
+        // CLOSE MODAL
+        function closeModal(modalId) {
+
+            const modal = document.getElementById(modalId);
+
+            if (!modal) {
+                return;
+            }
+
+            modal.classList.remove("open");
+
+            document.body.style.overflow = "";
+        }
+
+
+        // OPEN EDIT MODAL WITH MERCHANT DETAILS
+        function openEditModal(button) {
+
+            document.getElementById(
+                "editMerchantId"
+            ).value = button.dataset.id;
+
+            document.getElementById(
+                "editMerchantName"
+            ).value = button.dataset.name;
+
+            document.getElementById(
+                "editBusinessType"
+            ).value = button.dataset.type;
+
+            openModal("editModal");
+        }
+
+
+        // OPEN DELETE CONFIRMATION
+        function openDeleteModal(button) {
+
+            document.getElementById(
+                "deleteMerchantId"
+            ).value = button.dataset.id;
+
+            document.getElementById(
+                "deleteMerchantDisplay"
+            ).textContent = button.dataset.name;
+
+            openModal("deleteModal");
+        }
+
+
+        // CLOSE MODAL WHEN BACKDROP IS CLICKED
+        document.querySelectorAll(".modal").forEach(
+            function(modal) {
+
+                modal.addEventListener("click", function(event) {
+
+                    if (event.target === modal) {
+                        closeModal(modal.id);
+                    }
+
+                });
+
+            }
+        );
+
+
+        // CLOSE MODAL WITH ESCAPE KEY
+        document.addEventListener("keydown", function(event) {
+
+            if (event.key === "Escape") {
+
+                document.querySelectorAll(
+                    ".modal.open"
+                ).forEach(function(modal) {
+
+                    closeModal(modal.id);
+
+                });
+
+            }
+
+        });
+
+    </script>
+</body>
+</html>
