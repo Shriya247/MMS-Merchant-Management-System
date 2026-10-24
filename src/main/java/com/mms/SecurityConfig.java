@@ -26,7 +26,19 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
 
                 // PUBLIC PAGES AND STATIC RESOURCES
-                .requestMatchers(HttpMethod.GET, "/", "/login", "/merchants", "/payments", "/settlements", "/reports", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                .requestMatchers(
+                    HttpMethod.GET,
+                    "/",
+                    "/login",
+                    "/merchants",
+                    "/payments",
+                    "/settlements",
+                    "/reports",
+                    "/css/**",
+                    "/js/**",
+                    "/images/**",
+                    "/favicon.ico"
+                ).permitAll()
 
                 // ADMIN-ONLY OPERATIONS
                 .requestMatchers(
@@ -56,6 +68,7 @@ public class SecurityConfig {
 
             // ADMIN LOGOUT
             .logout(logout -> logout
+                .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout")
                 .permitAll()
             );

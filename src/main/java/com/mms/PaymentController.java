@@ -2,6 +2,7 @@
 package com.mms;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +25,7 @@ public class PaymentController {
     public String payments(
             @RequestParam(defaultValue = "") String search,
             @RequestParam(defaultValue = "ALL") String status,
+            @RequestParam(defaultValue = "ALL") String method,
             Model model) {
 
         // VALIDATE STATUS FILTER
@@ -34,7 +36,17 @@ public class PaymentController {
             status = "ALL";
         }
 
-        String sql = """
+        // VALIDATE PAYMENT METHOD FILTER
+        if (!method.equals("ALL")
+                && !method.equals("UPI")
+                && !method.equals("CARD")
+                && !method.equals("NET_BANKING")
+                && !method.equals("CASH")) {
+            method = "ALL";
+        }
+
+        // BASE SQL QUERY
+        StringBuilder sql = new StringBuilder("""
             SELECT p.*, m.merchant_name
             FROM payments p
             JOIN merchants m
@@ -44,30 +56,36 @@ public class PaymentController {
                 OR CAST(p.payment_id AS CHAR) LIKE ?
                 OR p.payment_method LIKE ?
             )
-            """;
-
-        if (!status.equals("ALL")) {
-            sql += " AND p.payment_status = ?";
-        }
-
-        sql += " ORDER BY p.payment_id DESC";
+            """);
 
         String keyword = "%" + search.trim() + "%";
 
-        List<Map<String, Object>> payments;
+        List<Object> parameters = new ArrayList<>();
 
-        if (status.equals("ALL")) {
+        parameters.add(keyword);
+        parameters.add(keyword);
+        parameters.add(keyword);
 
-            payments = jdbc.queryForList(
-                sql, keyword, keyword, keyword
-            );
-
-        } else {
-
-            payments = jdbc.queryForList(
-                sql, keyword, keyword, keyword, status
-            );
+        // FILTER BY PAYMENT STATUS
+        if (!status.equals("ALL")) {
+            sql.append(" AND p.payment_status = ?");
+            parameters.add(status);
         }
+
+        // FILTER BY PAYMENT METHOD
+        if (!method.equals("ALL")) {
+            sql.append(" AND p.payment_method = ?");
+            parameters.add(method);
+        }
+
+        sql.append(" ORDER BY p.payment_id DESC");
+
+        // FETCH FILTERED PAYMENTS
+        List<Map<String, Object>> payments =
+            jdbc.queryForList(
+                sql.toString(),
+                parameters.toArray()
+            );
 
         // ACTIVE MERCHANTS FOR NEW PAYMENTS
         List<Map<String, Object>> merchants =
@@ -78,10 +96,12 @@ public class PaymentController {
                 ORDER BY merchant_name ASC
                 """);
 
+        // SEND DATA TO THYMELEAF
         model.addAttribute("payments", payments);
         model.addAttribute("merchants", merchants);
         model.addAttribute("search", search);
         model.addAttribute("status", status);
+        model.addAttribute("method", method);
 
         return "payments";
     }
@@ -94,14 +114,24 @@ public class PaymentController {
             @RequestParam String paymentMethod) {
 
         // CHECK PAYMENT AMOUNT
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+        if (amount == null ||
+                amount.compareTo(BigDecimal.ZERO) <= 0) {
             return "redirect:/payments?error=amount";
         }
 
-        // CHECK PAYMENT METHOD
-        paymentMethod = paymentMethod.trim();
+        // VALIDATE PAYMENT METHOD
+        if (paymentMethod == null) {
+            return "redirect:/payments?error=method";
+        }
 
-        if (paymentMethod.isEmpty()) {
+        paymentMethod = paymentMethod.trim()
+                                     .toUpperCase();
+
+        if (!paymentMethod.equals("UPI")
+                && !paymentMethod.equals("CARD")
+                && !paymentMethod.equals("NET_BANKING")
+                && !paymentMethod.equals("CASH")) {
+
             return "redirect:/payments?error=method";
         }
 

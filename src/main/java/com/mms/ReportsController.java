@@ -2,6 +2,7 @@
 package com.mms;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +10,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class ReportsController {
@@ -97,31 +100,81 @@ public class ReportsController {
                 ORDER BY payment_count DESC
                 """);
 
-        // SEND DATA TO REPORTS PAGE
-        model.addAttribute(
-            "activeMerchants", activeMerchants
-        );
+        // NULL-SAFE VALUES FOR THYMELEAF
+        model.addAttribute("activeMerchants",
+            activeMerchants != null ? activeMerchants : 0);
 
-        model.addAttribute(
-            "successfulPayments", successfulPayments
-        );
+        model.addAttribute("successfulPayments",
+            successfulPayments != null ? successfulPayments : 0);
 
-        model.addAttribute(
-            "failedPayments", failedPayments
-        );
+        model.addAttribute("failedPayments",
+            failedPayments != null ? failedPayments : 0);
 
-        model.addAttribute(
-            "settledAmount", settledAmount
-        );
+        model.addAttribute("settledAmount",
+            settledAmount != null ? settledAmount : BigDecimal.ZERO);
 
-        model.addAttribute(
-            "merchantReport", merchantReport
-        );
-
-        model.addAttribute(
-            "methodReport", methodReport
-        );
+        model.addAttribute("merchantReport", merchantReport);
+        model.addAttribute("methodReport", methodReport);
 
         return "reports";
+    }
+
+    // DOWNLOAD PAYMENT REPORT AS CSV
+    @GetMapping("/reports/download")
+    public void downloadReport(HttpServletResponse response)
+            throws java.io.IOException {
+
+        response.setContentType("text/csv; charset=UTF-8");
+        response.setHeader(
+            "Content-Disposition",
+            "attachment; filename=\"MMS_Payment_Report.csv\""
+        );
+
+        List<Map<String, Object>> payments =
+            jdbc.queryForList("""
+                SELECT
+                    p.payment_id,
+                    m.merchant_name,
+                    p.amount,
+                    p.payment_method,
+                    p.payment_status
+                FROM payments p
+                JOIN merchants m
+                  ON p.merchant_id = m.merchant_id
+                ORDER BY p.payment_id DESC
+                """);
+
+        var writer = response.getWriter();
+
+        // CSV header
+        writer.println(
+            "Payment ID,Merchant Name,Amount,Payment Method,Status"
+        );
+
+        // CSV rows
+        for (Map<String, Object> payment : payments) {
+            writer.println(
+                csv(payment.get("payment_id")) + "," +
+                csv(payment.get("merchant_name")) + "," +
+                csv(payment.get("amount")) + "," +
+                csv(payment.get("payment_method")) + "," +
+                csv(payment.get("payment_status"))
+            );
+        }
+
+        writer.flush();
+    }
+
+    // SAFELY FORMAT VALUES FOR CSV
+    private String csv(Object value) {
+        String text = value == null ? "" : value.toString();
+
+        // Prevent spreadsheet formula injection
+        if (!text.isEmpty() &&
+            ("=+-@\t\r\n".indexOf(text.charAt(0)) >= 0)) {
+            text = "'" + text;
+        }
+
+        return "\"" + text.replace("\"", "\"\"") + "\"";
     }
 }

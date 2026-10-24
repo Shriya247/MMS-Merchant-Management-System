@@ -15,6 +15,9 @@ public class MerchantController {
 
     private final JdbcTemplate jdbc;
 
+    // MAXIMUM ALLOWED INPUT LENGTH
+    private static final int MAX_LENGTH = 100;
+
     public MerchantController(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
     }
@@ -66,7 +69,11 @@ public class MerchantController {
         businessType = businessType.trim();
 
         // VALIDATE INPUTS
-        if (merchantName.isEmpty() || businessType.isEmpty()) {
+        if (merchantName.isEmpty() ||
+                businessType.isEmpty() ||
+                merchantName.length() > MAX_LENGTH ||
+                businessType.length() > MAX_LENGTH) {
+
             return "redirect:/merchants?error=invalid";
         }
 
@@ -92,7 +99,11 @@ public class MerchantController {
         businessType = businessType.trim();
 
         // VALIDATE INPUTS
-        if (merchantName.isEmpty() || businessType.isEmpty()) {
+        if (merchantName.isEmpty() ||
+                businessType.isEmpty() ||
+                merchantName.length() > MAX_LENGTH ||
+                businessType.length() > MAX_LENGTH) {
+
             return "redirect:/merchants?error=invalid";
         }
 

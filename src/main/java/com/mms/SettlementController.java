@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -105,9 +105,9 @@ public class SettlementController {
                 amount
             );
 
-        } catch (DuplicateKeyException e) {
+        } catch (DataIntegrityViolationException e) {
 
-            // HANDLE DUPLICATE SETTLEMENT
+            // HANDLE DUPLICATE OR INVALID SETTLEMENT
             return "redirect:/settlements?error=duplicate";
         }
 

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 @ControllerAdvice
 public class GlobalModelAttributes {
 
+    // CHECK WHETHER CURRENT USER IS ADMIN
     @ModelAttribute("isAdmin")
     public boolean isAdmin() {
 
